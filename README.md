@@ -5,11 +5,16 @@ https://newshortenlink.herokuapp.com/
 Or try it locally
 ```
 git clone https://github.com/EvanBrightside/newshortenlink.git
+
 bundle install
+
 change base_url from `"https://newshortenlink.herokuapp.com/"` to `"http://localhost:4567/"` in shortlink_app.rb &
 change `https://newshortenlink.herokuapp.com/` to `http://localhost:4567/` in index.erb
+
 redis-server
+
 thin start
+
 And you will see a result here: http://localhost:3000/
 ```
 
