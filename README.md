@@ -4,13 +4,13 @@ https://newshortenlink.herokuapp.com/
 ```
 Or try it locally
 ```
-git clone
-undle install
-change base_url `"https://newshortenlink.herokuapp.com/"` to `"http://localhost:4567/"` in shortlink_app.rb &
+git clone https://github.com/EvanBrightside/newshortenlink.git
+bundle install
+change base_url from `"https://newshortenlink.herokuapp.com/"` to `"http://localhost:4567/"` in shortlink_app.rb &
 change `https://newshortenlink.herokuapp.com/` to `http://localhost:4567/` in index.erb
 redis-server
-ruby shortlink_app.rb
-And you will see a result here: http://localhost:4567/
+thin start
+And you will see a result here: http://localhost:3000/
 ```
 
 You can use it with API like
