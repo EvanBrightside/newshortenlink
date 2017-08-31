@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '2.4.0'
+ruby '2.4.1'
 
 gem 'sinatra'
 gem 'redis'
@@ -8,4 +8,9 @@ gem 'eventmachine'
 gem 'sinatra-contrib'
 gem 'thin'
 gem 'pry'
-gem 'rspec'
+gem 'async_sinatra'
+
+group :test do
+  gem "rspec"
+  gem "rack-test"
+end

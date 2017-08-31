@@ -1,2 +1,2 @@
 require './shortlink_app.rb'
-run Sinatra::Application
+run app: ShortLinkApp.new

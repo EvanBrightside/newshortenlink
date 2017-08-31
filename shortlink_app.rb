@@ -1,63 +1,106 @@
 require 'sinatra'
+require 'sinatra/base'
+require 'sinatra/namespace'
+require 'sinatra/async'
 require 'open-uri'
 require 'em-hiredis'
 require 'eventmachine'
-require 'sinatra/namespace'
 require 'pry'
-require 'erb'
 require 'json'
+require 'redis'
+require 'thin'
 
-configure do
-  require 'redis'
-  redisUri = ENV["REDISTOGO_URL"] || 'redis://localhost:6379'
-  uri = URI.parse(redisUri)
-  REDIS = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
-end
+def run(opts)
+  EM::run do
+    server  = opts[:server] || 'thin'
+    host    = opts[:host]   || '0.0.0.0'
+    port    = opts[:port]   || '8181'
+    web_app = opts[:app]
 
-helpers do
-  include Rack::Utils
-  alias_method :h, :escape_html
-end
+    @@redis = EM::Hiredis.connect
 
-def random_string(length)
-  rand(36**length).to_s(36)
-end
+    dispatch = Rack::Builder.app do
+      map '/' do
+        run web_app
+      end
+    end
 
-def link(full_url)
-  if !full_url.nil?
-    u = URI.parse(full_url)
-    (!u.scheme) ? link = "http://" + full_url : link = full_url
+    unless ['thin', 'hatetepe', 'goliath'].include? server
+      raise "Need an EM webserver, but #{server} isn't"
+    end
+
+    Rack::Server.start({
+      app:    dispatch,
+      server: server,
+      Host:   host,
+      Port:   port,
+      signals: false,
+    })
   end
 end
 
-get '/' do
-  erb :index
-end
+class ShortLinkApp < Sinatra::Base
+  register Sinatra::Async
+  register Sinatra::Namespace
 
-post '/' do
-  if params[:url] and not params[:url].empty?
-    @longUrl = random_string 5
-    REDIS.set "#{@longUrl}", params[:url]
+  configure do
+    set :threaded, false
   end
-  erb :index
-end
 
-get '/:longUrl' do
-  full_url = REDIS.get "#{params[:longUrl]}"
-  redirect link(full_url) || '/'
-end
+  helpers do
+    include Rack::Utils
+    alias_method :h, :escape_html
+  end
 
-namespace '/api/v1' do
-  base_url = "https://newshortenlink.herokuapp.com/"
+  def random_string(length)
+    rand(36**length).to_s(36)
+  end
 
-  post '/full.json' do
+  def link(full_url)
+    if !full_url.nil?
+      u = URI.parse(full_url)
+      (!u.scheme) ? link = "http://" + full_url : link = full_url
+    end
+  end
+
+  get '/' do
+    erb :index
+  end
+
+  apost '/' do
+    if params[:url] and not params[:url].empty?
+      @longUrl = random_string 5
+      @@redis.set("#{@longUrl}", params[:url]).tap do |d|
+        d.callback do |full_url|
+          body { erb :index }
+        end
+        d.errback { |e| err }
+      end
+    end
+  end
+
+  aget '/:longUrl' do
+    @@redis.get("#{params[:longUrl]}").callback { |full_url|
+      async_schedule { redirect link(full_url) || "/" }
+    }
+  end
+
+  base_url = "http://localhost:8181/"
+
+  apost '/api/v1/full.json' do
     content_type :json
     short_code = random_string 5
-    REDIS.set "#{short_code}", params[:long_url]
-    { url: base_url+short_code }.to_json
+    @@redis.set("#{short_code}", params[:long_url]).callback {
+
+      body { {"url": base_url+short_code}.to_json }
+    }
   end
 
-  get '/short/:url' do |url|
-    link(REDIS.get(url))
+  aget '/api/v1/short/:url' do |url|
+    @@redis.get(url).callback { |full_url|
+      body { link(full_url) }
+    }
   end
 end
+
+run(app: ShortLinkApp.new)
