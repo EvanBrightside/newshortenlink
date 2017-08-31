@@ -12,7 +12,7 @@ redis-server
 
 thin start
 
-And you will see a result here: http://localhost:3000/
+And you will see a result here: http://localhost:8181/
 ```
 
 You can use it with API like
