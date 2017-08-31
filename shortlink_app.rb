@@ -43,6 +43,8 @@ class ShortLinkApp < Sinatra::Base
   register Sinatra::Async
   register Sinatra::Namespace
 
+  base_url = "http://localhost:8181/"
+
   configure do
     set :threaded, false
   end
@@ -85,13 +87,10 @@ class ShortLinkApp < Sinatra::Base
     }
   end
 
-  base_url = "http://localhost:8181/"
-
   apost '/api/v1/full.json' do
     content_type :json
     short_code = random_string 5
     @@redis.set("#{short_code}", params[:long_url]).callback {
-
       body { {"url": base_url+short_code}.to_json }
     }
   end
