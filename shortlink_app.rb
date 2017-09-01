@@ -102,4 +102,4 @@ class ShortLinkApp < Sinatra::Base
   end
 end
 
-run(app: ShortLinkApp.new)
+run app: ShortLinkApp.new
