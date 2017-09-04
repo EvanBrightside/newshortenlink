@@ -1,6 +1,6 @@
 You can try it here
 
-[https://newshortenlink.herokuapp.com/](https://newshortenlink.herokuapp.com/)
+https://newshortenlink.herokuapp.com/
 
 Or try it locally
 ```sh
