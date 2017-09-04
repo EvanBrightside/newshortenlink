@@ -1,10 +1,10 @@
 You can try it here
 ```
-[https://newshortenlink.herokuapp.com/](https://newshortenlink.herokuapp.com/)
+https://newshortenlink.herokuapp.com/
 ```
 Or try it locally
 ```
-git clone [https://github.com/EvanBrightside/newshortenlink.git](https://github.com/EvanBrightside/newshortenlink.git)
+git clone https://github.com/EvanBrightside/newshortenlink.git
 
 bundle install
 
