@@ -1,16 +1,18 @@
 You can try it here
-```
-https://newshortenlink.herokuapp.com/
-```
+
+[https://newshortenlink.herokuapp.com/](https://newshortenlink.herokuapp.com/)
+
 Or try it locally
-```
-git clone https://github.com/EvanBrightside/newshortenlink.git
+```sh
+$ git clone https://github.com/EvanBrightside/newshortenlink.git
 
-bundle install
+$ cd newshortenlink
 
-redis-server
+$ bundle install
 
-thin start
+$ redis-server
+
+$ thin start
 
 And you will see a result here: http://localhost:8181/
 ```
